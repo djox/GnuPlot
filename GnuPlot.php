@@ -4,11 +4,20 @@ namespace Gregwar\GnuPlot;
 
 class GnuPlot
 {
+    // CSV data file
+    protected $csvfile = '';
+
+	// The CSV separator
+	protected $csvseparator = ";";
+	    
     // Values as an array
     protected $values = array();
 
     // Time format if X data is time
     protected $timeFormat = null;
+    
+    // Format of the x axis
+    protected $xtimeFormat = null;
 
     // Display mode
     protected $mode = 'line';
@@ -80,6 +89,24 @@ class GnuPlot
 
         return $this;
     }
+
+    /**
+     * set seaparator for CSV file
+     */
+     public function setCSVSeparator($separator)
+    {
+    	$this->csvseparator = $separator;
+    	return $this;
+    }
+        
+    /**
+     * Set the CSV file
+     */
+     public function setCSVFile($file)
+     {
+     	$this->csvfile = $file;
+     	return $this;
+     }
 
     /**
      * Push a new data, $x is a number, $y can be a number or an array
@@ -154,8 +181,12 @@ class GnuPlot
         if ($this->timeFormat) {
             $this->sendCommand('set xdata time');
             $this->sendCommand('set timefmt "'.$this->timeFormat.'"');
-            $this->sendCommand('set format x "'.$this->timeFormat.'"');
-            $this->sendCommand('set xtics rotate by 45 offset -6,-3');
+            if ($this->xtimeFormat) {
+            	$this->sendCommand('set format x "'.$this->xtimeFormat.'"');
+            } else {
+	            $this->sendCommand('set format x "'.$this->timeFormat.'"');
+	        }
+            //$this->sendCommand('set xtics rotate by 45 offset -6,-3');
         }
         
         if ($this->ylabel) {
@@ -183,6 +214,28 @@ class GnuPlot
         }
         $this->plotted = true;
         $this->sendData();
+    }
+
+    /**
+     * Runs the plot to the given pipe
+     */
+    public function plotFromCSVFile()
+    {
+		$this->sendCommand('plot "'.$this->csvfile.'" using 1:2 smooth bezier with lines title columnhead');
+        $this->plotted = true;
+        $this->sendData();
+    }
+    
+    /**
+     * use CSV data as data file
+     */
+    public function writePngFromCSV($file)
+    {
+        $this->sendInit();
+        $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
+        $this->sendCommand('set datafile separator "'.$this->csvseparator.'"');
+        $this->sendCommand('set output "'.$file.'"');
+        $this->plotFromCSVFile();
     }
 
     /**
@@ -255,6 +308,16 @@ class GnuPlot
      * Sets the X timeformat
      */
     public function setXTimeFormat($timeFormat)
+    {
+        $this->xtimeFormat = $timeFormat;
+
+        return $this;
+    }
+    
+    /**
+     * Sets the X timeformat
+     */
+    public function setTimeFormat($timeFormat)
     {
         $this->timeFormat = $timeFormat;
 
@@ -344,7 +407,7 @@ class GnuPlot
             2 => array('pipe', 'r')
         );
 
-        $this->process = proc_open('gnuplot', $descriptorspec, $pipes);
+        $this->process = proc_open('/opt/bin/gnuplot', $descriptorspec, $pipes);
 
         if (!is_resource($this->process)) {
             throw new \Exception('Unable to run GnuPlot');
