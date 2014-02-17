@@ -40,6 +40,9 @@ class GnuPlot
     // Y Label
     protected $ylabel;
 
+    // Y2 Label
+    protected $y2label;
+    
     // Graph labels
     protected $labels;
 
@@ -48,6 +51,9 @@ class GnuPlot
 
     // Y range scale
     protected $yrange;
+    
+    // Y2 range scale
+    protected $y2range;
 
     // Graph title
     protected $title;
@@ -84,8 +90,10 @@ class GnuPlot
         $this->values = array();
         $this->xlabel = null;
         $this->ylabel = null;
+        $this->y2label = null;
         $this->labels = array();
         $this->titles = array();
+        $this->yrange = null;
         $this->yrange = null;
         $this->title = null;
     }
@@ -105,6 +113,16 @@ class GnuPlot
     public function setYRange($min, $max)
     {
         $this->yrange = array($min, $max);
+
+        return $this;
+    }
+
+    /**
+     * Sets the Y2 Range for values
+     */
+    public function setY2Range($min, $max)
+    {
+        $this->y2range = array($min, $max);
 
         return $this;
     }
@@ -211,9 +229,17 @@ class GnuPlot
         if ($this->ylabel) {
             $this->sendCommand('set ylabel "'.$this->ylabel.'"');
         }
+        
+        if ($this->y2label) {
+            $this->sendCommand('set y2label "'.$this->y2label.'"');
+        }
 
         if ($this->yrange) {
             $this->sendCommand('set yrange ['.$this->yrange[0].':'.$this->yrange[1].']');
+        }
+        
+        if ($this->y2range) {
+            $this->sendCommand('set y2range ['.$this->y2range[0].':'.$this->y2range[1].']');
         }
 
         foreach ($this->labels as $label) {
@@ -241,10 +267,14 @@ class GnuPlot
     public function writePngFromCSV($file)
     {
         $this->sendInit();
+        $this->sendCommand('set xtics nomirror');
+        $this->sendCommand('set ytics nomirror');
+		$this->sendCommand('set y2tics');
+		$this->sendCommand('set tics out');
         $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
         $this->sendCommand('set datafile separator "'.$this->csvSeparator.'"');
         $this->sendCommand('set output "'.$file.'"');
-		$this->sendCommand('plot "'.$this->csvFile.'" using 1:2 smooth bezier with lines title columnhead');
+		$this->sendCommand('plot "'.$this->csvFile.'" using 1:2 axes x1y1 smooth bezier with lines title columnhead,\'\' using 1:3 axes x1y2 smooth bezier with lines title columnhead');
 		$this->plotted = true;
 		$this->sendData();
     }
@@ -255,7 +285,8 @@ class GnuPlot
     public function writePng($file)
     {
         $this->sendInit();
-        $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
+        $this->sendCommand('set xtics font "/usr/share/fonts/truetype/LinLibertine_RZah.ttf" 10');
+        $this->sendCommand('set terminal png font "/usr/share/fonts/truetype/LinLibertine_RZah.ttf" 10 size '.$this->width.','.$this->height);
         $this->sendCommand('set output "'.$file.'"');
         $this->plot();
     }
@@ -345,6 +376,17 @@ class GnuPlot
         return $this;
     }
 
+
+    /**
+     * Sets the label for Y2 axis
+     */
+    public function setY2Label($y2label)
+    {
+        $this->y2label = $y2label;
+
+        return $this;
+    }
+    
     /**
      * Add a label text
      */
