@@ -5,7 +5,7 @@ namespace Gregwar\GnuPlot;
 class GnuPlot
 {
 	// path to gnuplot
-	protected $pathToGnuPlot = "gnuplot";
+	protected $gnuPlot = "/opt/bin/gnuplot";
 	
     // CSV data file
     protected $csvFile = '';
@@ -72,7 +72,7 @@ class GnuPlot
     public static function withGnuPlot($path)
     {
         $instance = new self();
-    	$instance->setPathToGnuPlot($path);
+    	$instance->setGnuPlot($path);
     	return $instance;
     }
     
@@ -93,9 +93,9 @@ class GnuPlot
 	/**
 	 * Sets the path to GnuPlot
 	 */
-	 public function setPathToGnuPlot($path)
+	 public function setGnuPlot($path)
 	 {
-	 	$this->pathToGnuPlot = $path;
+	 	$this->gnuPlot = $path;
 	 	return $this;
 	 }
     
@@ -418,7 +418,7 @@ class GnuPlot
             2 => array('pipe', 'w')
         );
 
-        $this->process = proc_open($this->pathToGnuPlot, $descriptorspec, $pipes);
+        $this->process = proc_open($this->gnuPlot, $descriptorspec, $pipes);
 
         if (!is_resource($this->process)) {
             throw new Exception('Unable to run GnuPlot');
