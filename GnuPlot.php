@@ -72,7 +72,7 @@ class GnuPlot
     public static function withGnuPlot($path)
     {
         $instance = new self();
-    	$instance->setPathToGnuPlot( $path );
+    	$instance->setPathToGnuPlot($path);
     	return $instance;
     }
     
@@ -234,16 +234,6 @@ class GnuPlot
         $this->plotted = true;
         $this->sendData();
     }
-
-    /**
-     * Runs the plot to the given pipe
-     */
-    public function plotFromCSVFile()
-    {
-		$this->sendCommand('plot "'.$this->csvFile.'" using 1:2 smooth bezier with lines title columnhead');
-        $this->plotted = true;
-        $this->sendData();
-    }
     
     /**
      * use CSV data as data file
@@ -254,7 +244,9 @@ class GnuPlot
         $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
         $this->sendCommand('set datafile separator "'.$this->csvSeparator.'"');
         $this->sendCommand('set output "'.$file.'"');
-        $this->plotFromCSVFile();
+		$this->sendCommand('plot "'.$this->csvFile.'" using 1:2 smooth bezier with lines title columnhead');
+		$this->plotted = true;
+		$this->sendData();
     }
 
     /**
@@ -423,14 +415,23 @@ class GnuPlot
         $descriptorspec = array(
             0 => array('pipe', 'r'),
             1 => array('pipe', 'w'),
-            2 => array('pipe', 'r')
+            2 => array('pipe', 'w')
         );
 
         $this->process = proc_open($this->pathToGnuPlot, $descriptorspec, $pipes);
 
         if (!is_resource($this->process)) {
-            throw new \Exception('Unable to run GnuPlot');
+            throw new Exception('Unable to run GnuPlot');
         }
+        
+        stream_set_blocking($pipes[2], 0);
+        
+        if ($err = stream_get_contents($pipes[2]))
+    	{
+      		throw new Swift_Transport_TransportException(
+        		'Process could not be started [' . $err . ']'
+        	);
+    	}
 
         $this->stdin = $pipes[0];
         $this->stdout = $pipes[1];
