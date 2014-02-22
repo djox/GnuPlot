@@ -8,10 +8,10 @@ class GnuPlot
 	protected $gnuPlot = "/opt/bin/gnuplot";
 	
 	// font file definition
-	protected $fontfile = '/opt/share/fonts/FreeUniversal-Regular.ttf';
+	protected $fontfile = '';
 	
 	// font size
-	protected $fontsize = '9';
+	protected $fontsize = '';
 	
     // CSV data file
     protected $csvFile = '';
@@ -309,7 +309,12 @@ class GnuPlot
     {
         $this->sendInit();
         $this->sendCommand('set xtics');
-        $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
+        $command = '';
+        if ($this->fontfile) {
+        	$command = 'font "' . $this->fontfile . '" ' . $this->fontsize;
+        }
+
+        $this->sendCommand('set terminal png ' . $command . ' size ' . $this->width . ',' . $this->height);
         $this->sendCommand('set output "'.$file.'"');
         $this->plot();
     }
