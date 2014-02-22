@@ -7,6 +7,12 @@ class GnuPlot
 	// path to gnuplot
 	protected $gnuPlot = "/opt/bin/gnuplot";
 	
+	// font file definition
+	protected $fontfile = '/opt/share/fonts/FreeUniversal-Regular.ttf';
+	
+	// font size
+	protected $fontsize = '9';
+	
     // CSV data file
     protected $csvFile = '';
 
@@ -97,6 +103,16 @@ class GnuPlot
         $this->yrange = null;
         $this->title = null;
     }
+
+	/**
+	 * Sets the font
+	 */
+	 public function setFontfile($file, $fontsize)
+	 {
+	 	$this->fontfile = $file;
+	 	$this->fontsize = $fontsize;
+	 	return $this;
+	 }
 
 	/**
 	 * Sets the path to GnuPlot
@@ -262,7 +278,7 @@ class GnuPlot
     }
     
     /**
-     * use CSV data as data file
+     * write PNG from CSV data
      */
     public function writePngFromCSV($file)
     {
@@ -271,10 +287,17 @@ class GnuPlot
         $this->sendCommand('set ytics nomirror');
 		$this->sendCommand('set y2tics');
 		$this->sendCommand('set tics out');
-        $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
-        $this->sendCommand('set datafile separator "'.$this->csvSeparator.'"');
-        $this->sendCommand('set output "'.$file.'"');
-		$this->sendCommand('plot "'.$this->csvFile.'" using 1:2 axes x1y1 smooth bezier with lines title columnhead,\'\' using 1:3 axes x1y2 smooth bezier with lines title columnhead');
+        
+        $command = '';
+        if ($this->fontfile) {
+        	$command = 'font "' . $this->fontfile . '" ' . $this->fontsize;
+        }
+
+        $this->sendCommand('set terminal png ' . $command . ' size ' . $this->width . ',' . $this->height);
+        
+        $this->sendCommand('set datafile separator "' . $this->csvSeparator . '"');
+        $this->sendCommand('set output "' . $file . '"');
+		$this->sendCommand('plot "' . $this->csvFile . '" using 1:2 axes x1y1 smooth bezier with lines title columnhead,\'\' using 1:3 axes x1y2 smooth bezier with lines title columnhead');
 		$this->plotted = true;
 		$this->sendData();
     }
@@ -285,8 +308,8 @@ class GnuPlot
     public function writePng($file)
     {
         $this->sendInit();
-        $this->sendCommand('set xtics font "/usr/share/fonts/truetype/LinLibertine_RZah.ttf" 10');
-        $this->sendCommand('set terminal png font "/usr/share/fonts/truetype/LinLibertine_RZah.ttf" 10 size '.$this->width.','.$this->height);
+        $this->sendCommand('set xtics');
+        $this->sendCommand('set terminal png size '.$this->width.','.$this->height);
         $this->sendCommand('set output "'.$file.'"');
         $this->plot();
     }
