@@ -42,6 +42,9 @@ class GnuPlot
 
     // X Label
     protected $xlabel;
+    
+    // X range
+    protected $xrange;
 
     // Y Label
     protected $ylabel;
@@ -100,7 +103,8 @@ class GnuPlot
         $this->labels = array();
         $this->titles = array();
         $this->yrange = null;
-        $this->yrange = null;
+        $this->y2range = null;
+        $this->xrange = null;
         $this->title = null;
     }
 
@@ -122,6 +126,16 @@ class GnuPlot
 	 	$this->gnuPlot = $path;
 	 	return $this;
 	 }
+
+    /**
+     * Sets the X Range for values
+     */
+    public function setXRange($min, $max)
+    {
+        $this->xrange = array($min, $max);
+
+        return $this;
+    }
     
     /**
      * Sets the Y Range for values
@@ -248,6 +262,10 @@ class GnuPlot
         
         if ($this->y2label) {
             $this->sendCommand('set y2label "'.$this->y2label.'"');
+        }
+        
+        if ($this->xrange) {
+            $this->sendCommand('set xrange ['.$this->xrange[0].':'.$this->xrange[1].']');
         }
 
         if ($this->yrange) {
