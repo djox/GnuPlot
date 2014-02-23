@@ -265,7 +265,7 @@ class GnuPlot
         }
         
         if ($this->xrange) {
-            $this->sendCommand('set xrange ['.$this->xrange[0].':'.$this->xrange[1].']');
+            $this->sendCommand('set xrange ["'.$this->xrange[0].'":"'.$this->xrange[1].'"]');
         }
 
         if ($this->yrange) {
