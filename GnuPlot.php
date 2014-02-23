@@ -305,7 +305,7 @@ class GnuPlot
         $this->sendCommand('set ytics nomirror');
 		$this->sendCommand('set y2tics');
 		$this->sendCommand('set tics out');
-        
+		        
         $command = '';
         if ($this->fontfile) {
         	$command = 'font "' . $this->fontfile . '" ' . $this->fontsize;
@@ -315,7 +315,7 @@ class GnuPlot
         
         $this->sendCommand('set datafile separator "' . $this->csvSeparator . '"');
         $this->sendCommand('set output "' . $file . '"');
-		$this->sendCommand('plot "' . $this->csvFile . '" using 1:2 axes x1y1 smooth bezier with lines title columnhead,\'\' using 1:3 axes x1y2 smooth bezier with lines title columnhead');
+		$this->sendCommand('plot "' . $this->csvFile . '" using 1:2 axes x1y1 smooth bezier with lines lc rgbcolor "red" title columnhead,\'\' using 1:3 axes x1y2 smooth bezier with lines lc rgbcolor "blue" title columnhead');
 		$this->plotted = true;
 		$this->sendData();
     }
