@@ -12,6 +12,14 @@ $datafile = 'KlimaLoggPro.csv';
 // begin the session
 session_start();
 
+if (!isset($_SESSION['CREATED'])) {
+    $_SESSION['CREATED'] = time();
+} else if (time() - $_SESSION['CREATED'] > 1800) {
+    // session started more than 30 minutes ago
+    session_regenerate_id(true);    // change session ID for the current session an invalidate old session ID
+    $_SESSION['CREATED'] = time();  // update creation time
+}
+
 // Get start and end date from data file
 if (!isset($_SESSION['maxDate']))
 {
@@ -25,11 +33,10 @@ if (!isset($_SESSION['maxDate']))
 	$dates = explode(";",$lines[count($lines)-1],2);
 	$_SESSION['maxDate'] = new DateTime( $dates[0] );
 	
-} else {
-
-	$begin = $minDate = $_SESSION['minDate'];
-	$end = $maxDate = $_SESSION['maxDate'];
 }
+$begin = $minDate = $_SESSION['minDate'];
+$end = $maxDate = $_SESSION['maxDate'];
+
 
 if (!empty($_POST))
 {
@@ -165,10 +172,10 @@ $plot
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
-						<input type="text" class="form-control" name="startdate" id="startdate" placeholder="<? echo $begin->format('Y-m-d'); ?>">
+						<input type="date" class="form-control" name="startdate" id="startdate" placeholder="<? echo $begin->format('Y-m-d'); ?>">
 						</div>
 						<div class="form-group">
-						<input type="text" class="form-control" name="enddate" id="enddate" placeholder="<? echo $end->format('Y-m-d'); ?>">
+						<input type="date" class="form-control" name="enddate" id="enddate" placeholder="<? echo $end->format('Y-m-d'); ?>">
 						</div>
 						<div class="form-group">
 						<button name="refresh" type="submit" class="form-control btn btn-default">Aktualisieren</button>
