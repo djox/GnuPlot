@@ -18,6 +18,9 @@ class GnuPlot
 
 	// The CSV separator
 	protected $csvSeparator = ';';
+	
+	// Missing values are indicated by this string
+	protected $missingString = '---';
 	    
     // Values as an array
     protected $values = array();
@@ -314,8 +317,10 @@ class GnuPlot
         $this->sendCommand('set terminal png ' . $command . ' size ' . $this->width . ',' . $this->height);
         
         $this->sendCommand('set datafile separator "' . $this->csvSeparator . '"');
+        $this->sendCommand('set datafile missing "' . $this->missingString . '"');
+        $this->sendCommand('set decimal locale "de_DE"');
         $this->sendCommand('set output "' . $file . '"');
-		$this->sendCommand('plot "' . $this->csvFile . '" using 1:2 axes x1y1 smooth bezier with lines lc rgbcolor "red" title columnhead,\'\' using 1:3 axes x1y2 smooth bezier with lines lc rgbcolor "blue" title columnhead');
+		$this->sendCommand('plot "' . $this->csvFile . '" using 1:2 smooth csplines axes x1y1 with lines lc rgbcolor "red" title columnhead,\'\' using 1:3 smooth csplines axes x1y2 with lines lc rgbcolor "blue" title columnhead');
 		$this->plotted = true;
 		$this->sendData();
     }
